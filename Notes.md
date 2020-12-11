@@ -61,3 +61,34 @@ On app folder, we create our project.
 In this case, we can create it directly or create it on our docker-compose
 
 > docker-compose run app sh -c "django-admin.py startproject app ."
+
+## Travis-CI
+
+In this [page](https://travis-ci.org/) we can login with our Github account to sync our push with the testing. Then, click on `+` simbol near to `My Repositories` to add the required projects switching on.
+
+Then, we create a file called `.travis.yml` with the following contain
+
+```
+language: python                                                         # Language
+python:
+  - "3.6"                                                                # Version
+
+services:
+  - docker                                                               # Services to use
+
+before_script: pip install docker-compose                                # Use docker compose before to test
+
+script:
+  - docker-compose run --rm app sh -c "python manage.py test && flake8"  # Script to test
+```
+
+On the case of `flake8`, remember to declare it on `requirements.txt`. Also, we can create a `.flake8` file to define which files we need to ignore with the following syntax.
+
+```
+[flake8]
+exclude =
+  migrations,
+  __pycache__,
+  manage.py,
+  settings.py
+```
