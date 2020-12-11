@@ -82,7 +82,7 @@ script:
   - docker-compose run --rm app sh -c "python manage.py test && flake8"  # Script to test
 ```
 
-On the case of `flake8`, remember to declare it on `requirements.txt`. Also, we can create a `.flake8` file to define which files we need to ignore with the following syntax.
+On the case of `flake8`, remember to declare it on `requirements.txt`. Also, we can create a `.flake8` file to define which files we need to ignore with the following syntax. It must be into the app folder
 
 ```
 [flake8]
