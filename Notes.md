@@ -92,3 +92,19 @@ exclude =
   manage.py,
   settings.py
 ```
+
+# Test Driven Development
+
+## Testing
+
+Django framework can use testing  when you create a file named `test.py` in any part of the project. It will be runned when you executed `python manage.py test`
+On `test.py` you create an object inherit from `TestCase` on `django.test`. On the new class you can create your test functions. The functions must begin with "test"
+
+## TDD methodology
+
+When you code with this methodology, you need to create the testing functions firsts. When the test failed, you need to code the minimal to pass the test.
+
+ 1) Code testing
+ 2) Run test and check with testing failed
+ 3) Code to solve failed test
+ 4) Check again steps 2 and 3 until there isn't failed test
