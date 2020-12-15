@@ -108,3 +108,9 @@ When you code with this methodology, you need to create the testing functions fi
  2) Run test and check with testing failed
  3) Code to solve failed test
  4) Check again steps 2 and 3 until there isn't failed test
+
+ ## Fine tunning
+
+ Every app than we create, we will delete "test.py" file than generate.
+
+ We will create a folder named "test" and it will have a file called "__init__.py". The objective is to create tests in direrent files.
