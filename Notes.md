@@ -100,6 +100,18 @@ exclude =
 Django framework can use testing  when you create a file named `test.py` in any part of the project. It will be runned when you executed `python manage.py test`
 On `test.py` you create an object inherit from `TestCase` on `django.test`. On the new class you can create your test functions. The functions must begin with "test"
 
+## Test Case
+
+Into our test class we can find the following
+
+ - setUp function: This function starts before all our test. In this function, we can generate the initial values for our testings.
+
+ - Testing functions: The test function must begin with `test_`. We execute the required code and finally, we will check the comparisons to define than the test is passed or failed. These are the available comparisons.
+   - `self.assertEqual(A, B)`. A is equals to B
+   - `self.assertTrue(A)`: A equals true
+   - `self.assertRaises(Error)`: It must be on a with statement. If the code generates an `Error`, passed
+   - `self.assertContains(A, B)`: B is contained on A. Also, A must have a 200 OK status.
+
 ## TDD methodology
 
 When you code with this methodology, you need to create the testing functions firsts. When the test failed, you need to code the minimal to pass the test.
@@ -114,3 +126,89 @@ When you code with this methodology, you need to create the testing functions fi
  Every app than we create, we will delete "test.py" file than generate.
 
  We will create a folder named "test" and it will have a file called "__init__.py". The objective is to create tests in direrent files.
+
+ # Miscelaneous
+
+ ## Reverse
+
+Importing reverse from django.urls, we can manage urls direcly on our code using names instead of direct URL's.
+
+> from django.urls import reverse
+
+We can get a url inserting the name on url as reverse paramenter.
+
+> url = reverse('APP:PAGE')
+
+The name of the admin pages we can find it on the [documentation](https://docs.djangoproject.com/en/2.1/ref/contrib/admin/#reversing-admin-urls).
+
+If we want to check an url with parameters, we need to use the `args` parameter.
+
+> url = reverse('admin:core_user_change', args=[self.user.id])
+
+ ## Client
+
+Importing `Client` from `django.test`, we can generate a virtual client who will be executing actions on our pages.
+
+> from django.test import Client
+
+We can create a client lisk this
+
+> self.client = Client()
+
+Then, force to login it 
+
+> self.client.force_login(USER)
+
+Also, client can accsend a GET request to an url (reverse)
+
+> res = self.client.get(url)
+
+We can check if the request has an status code with the `status_code` value.
+
+> self.assertEqual(res.status_code, 200)
+
+## Modify admin view
+
+On `admin.py` we usually add the following line to add a model on the admin site
+
+> admin.site.register(models.User)
+
+But the admin will show a default view. So, if we want to assign a different view, we need to difine it as a second parameter.
+
+> admin.site.register(models.User, UserAdmin)
+
+To create the new view, we need to create it importing `UserAdmin` from `django.contrib.auth.admin`. Into the class, we can define some parameters like
+ - `ordering` of the registers
+ - `list_displays` on the general display
+ - `fieldsets`: The fields containing on a tuple. It's a set of subsets, every subset ha a section name and a dictionary with the fields required.
+ - `add_fields`: The fields required to add an user. It requires as `fieldsets` a set of sebsets. The subsets must have a name and a dictionary with the fields and classes to visualizing (we usually assign `wide` class as default)
+
+```
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+
+
+class UserAdmin(BaseUserAdmin):
+    ordering = ['id']
+    list_display = ['email', 'name']
+    fieldsets = (
+        (None, {'fields': ('email', 'password')}),
+        (_('Personal Info'), {'fields': ('name',)}),
+        (_('Permissions'), {'fields': (
+            'is_active',
+            'is_staff',
+            'is_superuser',
+            )}),
+        (_('Important dates'), {'fields': ('last_login',)}),
+    )
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('email', 'password1', 'password2')
+            }),
+            )
+    
+```
+
+It's a best practice thant titles passed on a translation importing `gettext` from `django.utils.translation`. We can declare it calling as `_`
+
+> from django.utils.translation import gettext as _
