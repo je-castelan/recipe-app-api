@@ -49,10 +49,71 @@ services:                                              # Services sections
    command: >
      sh -c "python manage.py runserver 0.0.0.0:8000"   # Run django project (not show command)
 ```
-
 Finally, we create the components with the following command
 
 > docker-compose build
+
+## Postgresql 
+
+If we want to add a Postgresql service, we can create with the following info
+
+```
+  db:                                           # Service database
+    image: postgres-10-alpine                   # Imagen postgres light (alphone)
+    environment:                                # The following has the database connection information
+      - POSTGRES_DB=app
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=supersecretpassword
+```
+
+We need to add the database information connection to our app service
+
+```
+version: '3'
+services:
+ app: 
+   ...
+   environment:
+    - DB_HOST=db                                 # Database host is our dababase instance
+    - DB_NAME=app
+    - DB_USER=postgres
+    - DB_PASS=supersecretpassword
+  depends_on:                                    # Database must begin first and persist to work with app
+    - db 
+```
+
+Our project must read the environment variants using `settings.py`
+
+```
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'HOST': os.environ.get('DB_HOST'),
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASS'),
+    }
+}
+```
+
+Also, add the installation on `requirements.py`
+
+```
+psycopg2>=2.7.5,<2.8.0
+```
+
+And also, django dockerfile will need to install the postgresql client to consult database. Also, it will require to install other dependencies.
+
+```
+# Install dependencies
+COPY ./requirements.txt /requirements.txt
+
+RUN apk add --update --no-cache postgresql-client
+RUN apk add --update --no-cache --virtual .tmp-build-deps \
+	gcc libc-dev linux-headers postgresql-dev
+RUN pip install -r /requirements.txt
+RUN apk del .tmp-build-deps
+```
 
 ## Django project
 
