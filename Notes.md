@@ -188,6 +188,14 @@ When you code with this methodology, you need to create the testing functions fi
 
  We will create a folder named "test" and it will have a file called "__init__.py". The objective is to create tests in direrent files.
 
+ ## Mocking
+
+Mocking is when you override the behavior of your dependencies of the code than tou are testing. We use mocking to avoid any unintended side effects and also to isolate the specific piece of code that we want to test.
+
+We don't have to depende our test from external resources. An example is to tests a send email function. We won't be sending real emails on testings. We only need to check than the function receives the correct paramenters.
+
+To implement mock, we need to import `patch` from `unittest.mock`.
+
  # Miscelaneous
 
  ## Reverse
@@ -273,3 +281,14 @@ class UserAdmin(BaseUserAdmin):
 It's a best practice thant titles passed on a translation importing `gettext` from `django.utils.translation`. We can declare it calling as `_`
 
 > from django.utils.translation import gettext as _
+
+## Commands
+
+On the backend, we need to execute some process to manage our projects. These process must be on a `management` folder on our applications. Also, it will have a `__init__.py` file. Then, into the `management` folder, we will create another folder called `commands`. This folder will also have the `__init__.py` file.
+
+The commands than we create, we can execute with `python manage.py NEW_COMMAND` 
+
+Coding the new command, it must be a class inherit from `BaseCommand` (from django.core.management.base import BaseCommand). The body of the command will be into a `handle` function (def handle(self, *args, **options)).
+
+
+
