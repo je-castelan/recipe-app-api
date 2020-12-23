@@ -236,6 +236,27 @@ We can check if the request has an status code with the `status_code` value.
 
 > self.assertEqual(res.status_code, 200)
 
+## APIClient
+
+This client is imported from `rest_framework.test` 
+
+> from rest_framework.test import APIClient
+
+Similar to client from `django.test` you can execute http request
+
+> res = self.client.post(URL, payload)
+
+## Status
+
+To compare request status, we need to use `status` object from `rest_framework`.
+
+These are some status to work. You can find all on [this link](https://www.django-rest-framework.org/api-guide/status-codes/).
+
+ - status.HTTP_200_OK
+ - status.HTTP_400_BAD_REQUEST
+ - status.HTTP_201_CREATED
+
+
 ## Modify admin view
 
 On `admin.py` we usually add the following line to add a model on the admin site
@@ -290,5 +311,35 @@ The commands than we create, we can execute with `python manage.py NEW_COMMAND`
 
 Coding the new command, it must be a class inherit from `BaseCommand` (from django.core.management.base import BaseCommand). The body of the command will be into a `handle` function (def handle(self, *args, **options)).
 
+## Generics
 
+We can create a APIView than give us all the http´methods, or we can only define a segmented APIView for one action.
 
+This is using `generics` from `rest_framework`.
+
+We can create a APIView only inherit the class with the action required (we can check the generics classes available [here](https://www.django-rest-framework.org/api-guide/generic-views/#concrete-view-classes)).
+
+ - generics.CreateAPIView for only creation
+ - generics.ListAPIView for only listing
+
+## URL's
+
+On main project, we need to point the app's url.
+
+```
+urlpatterns = [
+    ....
+    path('api_project/app_url/', include('app.urls'))
+]
+
+```
+
+On app url, se specify whe name of app for the reverse funcction,. Also the name of every class view on the urlpatterns.
+
+```
+app_name = 'api_name'
+
+urlpatterns = [
+    path('function/', views.Function.as_view(), name='function_name'), #reverse name will be "api_name.function_name"
+]
+```
