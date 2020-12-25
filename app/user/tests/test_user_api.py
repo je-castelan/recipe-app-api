@@ -7,6 +7,8 @@ from rest_framework import status
 
 
 CREATE_USER_URL = reverse('user:create')
+TOKEN_URL_V1 = reverse('user:tokenv1')
+TOKEN_URL_V2 = reverse('user:tokenv2')
 
 
 def create_user(**params):
@@ -58,3 +60,117 @@ class PublicUserApiTests(TestCase):
             email=payload['email']
         ).exists()
         self.assertFalse(user_exists)
+
+    """
+    These tests are using default viewset as basic couse.
+    We named the login field as username (as the basic ViewSet)
+    """
+
+    def test_create_token_for_user_v1(self):
+        """Test that a token is created for the user"""
+        payload_create = {
+            'email': 'test@londonappdev.com',
+            'password': 'testpass',
+            'name': 'name',
+        }
+        # self.client.post(CREATE_USER_URL, payload_create)
+        create_user(**payload_create)
+        payload_access = {
+            'username': 'test@londonappdev.com',
+            'password': 'testpass',
+        }
+        res = self.client.post(TOKEN_URL_V1, payload_access)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn('token', res.data)
+
+    def test_create_token_invalid_credentials_v1(self):
+        """Test that token is not created if invalid credentials are given"""
+        payload_create = {
+            'email': 'test2@londonappdev.com',
+            'password': 'testpass2',
+            'name': 'name',
+        }
+        # self.client.post(CREATE_USER_URL, payload_create)
+        create_user(**payload_create)
+        payload_access = {
+            'username': 'test2@londonappdev.com',
+            'password': 'testpass',
+        }
+        res = self.client.post(TOKEN_URL_V1, payload_access)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertNotIn('token', res.data)
+
+    def test_create_token_no_user_v1(self):
+        """Test that token is not created if user doens't exist"""
+        payload_access = {
+            'username': 'test3@londonappdev.com',
+            'password': 'testpass',
+        }
+        res = self.client.post(TOKEN_URL_V1, payload_access)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertNotIn('token', res.data)
+
+    def test_create_token_missing_field_v1(self):
+        """Test that email and password are required"""
+        payload_access = {
+            'username': 'test4@londonappdev.com',
+        }
+        res = self.client.post(TOKEN_URL_V1, payload_access)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertNotIn('token', res.data)
+
+    """
+    These tests are using default viewset with customized serializer
+    We named the login field as "email". This is customized on serializer
+    """
+
+    def test_create_token_for_user_v2(self):
+        """Test that a token is created for the user"""
+        payload_create = {
+            'email': 'test@londonappdev.com',
+            'password': 'testpass',
+            'name': 'name',
+        }
+        create_user(**payload_create)
+        payload_access = {
+            'email': 'test@londonappdev.com',
+            'password': 'testpass',
+        }
+        res = self.client.post(TOKEN_URL_V2, payload_access)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn('token', res.data)
+
+    def test_create_token_invalid_credentials_v2(self):
+        """Test that token is not created if invalid credentials are given"""
+        payload_create = {
+            'email': 'test2@londonappdev.com',
+            'password': 'testpass2',
+            'name': 'name',
+        }
+        create_user(**payload_create)
+        payload_access = {
+            'email': 'test2@londonappdev.com',
+            'password': 'testpass',
+        }
+        res = self.client.post(TOKEN_URL_V2, payload_access)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertNotIn('token', res.data)
+
+    def test_create_token_no_user_v2(self):
+        """Test that token is not created if user doens't exist"""
+        payload_access = {
+            'email': 'test3@londonappdev.com',
+            'password': 'testpass',
+        }
+        res = self.client.post(TOKEN_URL_V2, payload_access)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertNotIn('token', res.data)
+
+    def test_create_token_missing_field_v2(self):
+        """Test that email and password are required"""
+        payload_access = {
+            'email': 'test4@londonappdev.com',
+        }
+        res = self.client.post(TOKEN_URL_V2, payload_access)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertNotIn('token', res.data)
