@@ -8,7 +8,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ('id', 'email', 'name', 'password')
+        fields = ('email', 'name', 'password')
         extra_kwargs = {
             'password': {
                 'write_only': True,
@@ -29,6 +29,13 @@ class UserProfileSerializer(serializers.ModelSerializer):
         return user
         """
         return get_user_model().objects.create_user(**validated_data)
+
+    def update(self, instance, validated_data):
+        """Handle updating user account"""
+        if 'password' in validated_data:
+            password = validated_data.pop('password')
+            instance.set_password(password)
+        return super().update(instance, validated_data)
 
 
 class AuthTokenSerializer(serializers.Serializer):
