@@ -343,3 +343,45 @@ urlpatterns = [
     path('function/', views.Function.as_view(), name='function_name'), #reverse name will be "api_name.function_name"
 ]
 ```
+
+## Viewset and Mixins
+
+In case tahn we want to create a viewsets than manage two or more HTTP methods, instead to creeate one by one, we can create a class inherit from `viewsets.GenericViewSet` and also inherit from `, mixins.x`, where x is the required method (you can check the [here](https://www.django-rest-framework.org/api-guide/generic-views/#mixins), also, you can check an example [here](https://www.django-rest-framework.org/api-guide/viewsets/#custom-viewset-base-classes)).
+
+```
+from rest_framework import viewsets, mixins
+
+
+class MyViewSet(
+  viewsets.GenericViewSet,
+  mixins.ListModelMixin,
+  CreateModelMixin):
+  """Viewset to only list and create"""
+  pass
+
+```
+
+## URL's for mixings
+
+To generate url's for mixings, it's neccesary to create a router on url's file.
+
+```
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from recipe import views
+
+app_name = 'my_app'
+
+router = DefaultRouter()
+router.register('my_view', views.TagView)
+
+urlpatterns = [
+    path('', include(router.urls))
+]
+```
+
+For this case, you will have the url's with the following reverse syntax:
+
+> my_app:my_view:my_methods
+
+The methods allowed are the same on the inherited mixins. You can check the reverse methods [here](https://www.django-rest-framework.org/api-guide/routers/#simplerouter).
