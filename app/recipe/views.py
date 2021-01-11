@@ -1,20 +1,18 @@
 from rest_framework import viewsets, mixins
 from recipe import serializers
-from core.models import Tag
+from core.models import Tag, Ingredient
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
 
-class TagView(
+class BaseRecipeView(
     viewsets.GenericViewSet,
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
 ):
-    """Create a new user in the system"""
-    authentication_classes = (TokenAuthentication,)
-    serializer_class = serializers.TagSerializer
+    """Define a generic ViewSet for Ingredients and Tags"""
     permission_classes = (IsAuthenticated,)
-    queryset = Tag.objects.all()
+    authentication_classes = (TokenAuthentication,)
 
     def get_queryset(self):
         """Return only the tags from the logged user"""
@@ -27,3 +25,15 @@ class TagView(
         https://www.django-rest-framework.org/api-guide/generic-views/
         """
         serializer.save(user=self.request.user)
+
+
+class TagView(BaseRecipeView):
+    """Create a new tag for an user"""
+    serializer_class = serializers.TagSerializer
+    queryset = Tag.objects.all()
+
+
+class IngredientView(BaseRecipeView):
+    """Create a new ingredient for an user"""
+    serializer_class = serializers.IngredientSerializer
+    queryset = Ingredient.objects.all()
