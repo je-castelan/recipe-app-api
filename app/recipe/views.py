@@ -1,6 +1,6 @@
 from rest_framework import viewsets, mixins
 from recipe import serializers
-from core.models import Tag, Ingredient
+from core.models import Tag, Ingredient, Recipe
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
@@ -37,3 +37,22 @@ class IngredientView(BaseRecipeView):
     """Create a new ingredient for an user"""
     serializer_class = serializers.IngredientSerializer
     queryset = Ingredient.objects.all()
+
+
+class RecipeView(viewsets.ModelViewSet):
+    """Manage recipe"""
+    serializer_class = serializers.RecipeSerializer
+    queryset = Recipe.objects.all()
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        """Retrieve the recipes for the authenticated user"""
+        return self.queryset.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        """Sets the user profile to the logged in user.
+        More info here
+        https://www.django-rest-framework.org/api-guide/generic-views/
+        """
+        serializer.save(user=self.request.user)

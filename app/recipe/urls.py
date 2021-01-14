@@ -7,6 +7,7 @@ app_name = 'recipe'
 router = DefaultRouter()
 router.register('tags', views.TagView)
 router.register('ingredient', views.IngredientView)
+router.register('recipe', views.RecipeView)
 
 urlpatterns = [
     path('', include(router.urls))
