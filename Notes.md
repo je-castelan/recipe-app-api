@@ -385,3 +385,24 @@ For this case, you will have the url's with the following reverse syntax:
 > my_app:my_view:my_methods
 
 The methods allowed are the same on the inherited mixins. You can check the reverse methods [here](https://www.django-rest-framework.org/api-guide/routers/#simplerouter).
+
+## Many to many serializers
+
+In case to display serializers with many to many attributes, we can try two ways.
+
+1) `PrimaryKeyRelatedField`. Imported from serializers, this kind of gield will only return the id's of every element on the serializer.
+
+2) `Serializer(many=True, read_only=True)`: A filed will be called as a previously serializer created. The element will show the fields on the previous serializer.
+
+## Self.action
+
+If we want to change any parameter depending of action (get, post, etc), we can select it with the ``self.action` operator.
+
+```
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return serializers.RecipeDetailSerializer
+        return self.serializer_class
+```
+
+The existing actions can be found [here](https://www.django-rest-framework.org/api-guide/viewsets/#viewset-actions).
