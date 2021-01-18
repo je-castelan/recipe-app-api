@@ -165,7 +165,9 @@ On `test.py` you create an object inherit from `TestCase` on `django.test`. On t
 
 Into our test class we can find the following
 
- - setUp function: This function starts before all our test. In this function, we can generate the initial values for our testings.
+ - `setUp` function: This function starts before all our test. In this function, we can generate the initial values for our testings.
+
+ - `tearDown`: This function will execute when tests are finished.
 
  - Testing functions: The test function must begin with `test_`. We execute the required code and finally, we will check the comparisons to define than the test is passed or failed. These are the available comparisons.
    - `self.assertEqual(A, B)`. A is equals to B
@@ -406,3 +408,125 @@ If we want to change any parameter depending of action (get, post, etc), we can 
 ```
 
 The existing actions can be found [here](https://www.django-rest-framework.org/api-guide/viewsets/#viewset-actions).
+
+## Pillow
+
+This component allow us to manage images on our models.
+
+We nee to add the following component on `requirements.txt`.
+
+```
+Pillow>=5.3.0,<5.4.0
+```
+
+In `Dockerfile`, we need to add `jpeg-dev` apk and also `musl-dev zlib zlib-dev` temporal packages to install.
+
+Then, we need to have a directory for static and media files.
+
+```
+RUN apk add --update --no-cache postgresql-client jpeg-dev
+RUN apk add --update --no-cache --virtual .tmp-build-deps \
+	gcc libc-dev linux-headers postgresql-dev musl-dev zlib zlib-dev
+RUN pip install -r /requirements.txt
+RUN apk del .tmp-build-deps
+
+# Setup directory structure
+RUN mkdir /app
+WORKDIR /app
+COPY ./app/ /app
+
+# Create media and static directories
+RUN mkdir -p /vol/web/media
+RUN mkdir -p /vol/web/static
+
+# Create new user
+RUN adduser -D user
+
+# New user will have assigned new direvtoires
+RUN chown -R user:user /vol/
+RUN chmod -R 755 /vol/web
+USER user
+```
+
+Then, on `settings.py`, you must add the static and media url's.
+
+```
+STATIC_URL = '/static/' # Statics will be on server:port/static/
+MEDIA_URL = '/media/' # Media will be on server:port/media/
+
+MEDIA_ROOT = '/vol/web/media'
+STATIC_ROOT = '/vol/web/static'
+```
+
+Finally, we need to add media url on url's.py (it's neccesary to import `static` from `django.conf.urls.static`, and `settings` from `django.conf`).
+
+```
+from django.conf.urls.static import static
+from django.conf import settings
+
+urlpatterns = [
+	...
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+```
+
+With all of this, you can add Image
+
+```
+image = models.ImageField(null=True, upload_to=recipe_image_file_path)
+```
+
+Remember to access to the POST formws with images with multipart format.
+
+```
+self.client.post(url, {'image': ntf}, format='multipart')
+```
+
+## UUID
+
+Python can use a funtion to generate unique id's.
+
+```
+import uuid
+
+def recipe_image_file_path(instance, filename):
+    """Generate file path for new recipe image"""
+    ext = filename.split('.')[-1]
+    filename = f'{uuid.uuid4()}.{ext}'
+
+    return os.path.join('uploads/recipe/', filename)
+```
+
+## Extra actions
+
+On a Viewset, we can create a new function apart of get, post, patch, delete.
+
+On the new function, you must add a decorator with the following information
+ - Assign the used method (get, post)
+ - detailboolean value to define if the function is a list (false) or unique detail (true)
+ - url_path to access to the function.
+
+More information on [this url](https://www.django-rest-framework.org/api-guide/viewsets/#marking-extra-actions-for-routing).
+
+````
+    @action(methods=['POST'], detail=True, url_path='new_function')
+    def new_funcion(self, request, pk=None):
+        """Upload an image to a recipe"""
+        recipe = self.get_object()
+        # We need to get a serializer with the values inserted
+        serializer = self.get_serializer(
+            recipe,
+            data=request.data
+        )
+        # Return values if serializer is valid
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                serializer.data,
+                status=status.HTTP_200_OK
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+```
